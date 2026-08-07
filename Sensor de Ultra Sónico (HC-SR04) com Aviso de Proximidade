@@ -1,0 +1,48 @@
+// Define os pinos
+const int trigPin = 9;      // Pino TRIG do sensor ultrassônico
+const int echoPin = 10;     // Pino ECHO do sensor ultrassônico
+const int buzzerPin = 6;    // Pino do buzzer
+const int motorPin = 5;     // Pino do motor vibra call
+
+void setup() {
+  pinMode(trigPin, OUTPUT);    // Define o pino TRIG como saída
+  pinMode(echoPin, INPUT);     // Define o pino ECHO como entrada
+  pinMode(buzzerPin, OUTPUT);  // Define o pino do buzzer como saída
+  pinMode(motorPin, OUTPUT);   // Define o pino do motor como saída
+
+  Serial.begin(9600);          // Inicializa a comunicação serial
+}
+
+void loop() {
+  // Medir a distância
+  long duration, distance;
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distance = (duration / 2) / 29.1;  // Calcula a distância em centímetros
+
+  // Mapeia a distância para a intensidade do buzzer e do motor
+  int buzzerIntensity = map(distance, 0, 100, 255, 0); // Mapeia para 0-255 (PWM)
+  int motorIntensity = map(distance, 0, 100, 255, 0);  // Mapeia para 0-255 (PWM)
+
+  // Limita os valores de intensidade para evitar valores negativos
+  buzzerIntensity = constrain(buzzerIntensity, 0, 255);
+  motorIntensity = constrain(motorIntensity, 0, 255);
+
+  // Ativa o buzzer e o motor conforme a intensidade mapeada
+  analogWrite(buzzerPin, buzzerIntensity);
+  analogWrite(motorPin, motorIntensity);
+
+  // Para fins de monitoramento, imprime a distância e as intensidades
+  Serial.print("Distância: ");
+  Serial.print(distance);
+  Serial.print(" cm, Intensidade do Buzzer: ");
+  Serial.print(buzzerIntensity);
+  Serial.print(", Intensidade do Motor: ");
+  Serial.println(motorIntensity);
+
+  delay(100);  // Pequeno atraso para estabilizar a leitura
+}
